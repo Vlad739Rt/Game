@@ -21,7 +21,7 @@ body.touch #mobileUI{display:block}
 #btnLeanL,#btnLeanR{border-radius:50%;background:rgba(60,60,90,.8);border:2px solid rgba(180,180,255,.6);font-size:22px;color:#c8d0ff}
 #btnLeanL.pressed,#btnLeanR.pressed{transform:scale(.9);background:rgba(100,120,200,.95)}
 #btnReload{border-radius:50%;background:rgba(50,50,75,.8);border:2px solid rgba(255,255,255,.65);font-size:26px}
-#btnReload.pressed{transfo<div class="setting-row"><label>4D-эффекты</label><div class="toggle" id="effects4dTgl"></div></div>rm:scale(.9)}
+#btnReload.pressed{transform:scale(.9)}
 #btnJump{border-radius:50%;background:rgba(40,80,40,.85);border:2px solid rgba(120,255,120,.75);font-size:24px}
 #btnJump.pressed{transform:scale(.9)}
 #btnCrouch{border-radius:50%;background:rgba(80,60,30,.85);border:2px solid rgba(255,180,80,.8);font-size:20px}
@@ -53,41 +53,41 @@ body.editMode #editBar{display:flex}
 #editBar .label{font-size:13px;color:#ddd}
 #errBox{position:fixed;top:0;left:0;right:0;background:rgba(120,0,0,.95);color:#fff;font:12px monospace;padding:8px;z-index:99999;display:none;max-height:40vh;overflow-y:auto;white-space:pre-wrap;pointer-events:none}
 #weaponMenu,#settings,#lobby,#mapSelectModal,#deathScreen,#gunMenuLobby{-webkit-overflow-scrolling:touch;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y}
-#weaponMenu{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:250;display:none;padding:16px;padding-bottom:90px;pointer-events:auto}
+#weaponMenu{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:250;display:none;pointer-events:auto;overflow-y:auto}
 #weaponMenu.open{display:block}
-.weapon-panel{max-width:640px;margin:0 auto;background:#15151f;border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:18px;pointer-events:auto}
-.weapon-panel h2{margin:0 0 6px;font-size:22px;text-align:center;color:#ffcc44}
-.weapon-panel .sub{text-align:center;font-size:12px;color:#888;margin-bottom:14px}
-.slots-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
-.slot-box{background:#1e1e2a;border:2px solid rgba(255,255,255,.12);border-radius:10px;padding:10px;text-align:center}
+.weapon-panel{max-width:900px;margin:16px auto;background:#15151f;border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:14px;pointer-events:auto}
+.weapon-panel h2{margin:0 0 4px;font-size:18px;text-align:center;color:#ffcc44}
+.weapon-panel .sub{text-align:center;font-size:11px;color:#888;margin-bottom:10px}
+.slots-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.slot-box{background:#1e1e2a;border:2px solid rgba(255,255,255,.12);border-radius:8px;padding:8px;text-align:center}
 .slot-box.slot1{border-color:rgba(74,158,255,.5)}
 .slot-box.slot2{border-color:rgba(255,150,80,.5)}
 .slot-box.slot3{border-color:rgba(200,150,255,.5)}
-.slot-box .slot-num{font-size:11px;color:#888;letter-spacing:1px;text-transform:uppercase}
-.slot-box .slot-name{font-size:14px;font-weight:bold;color:#fff;margin-top:4px}
-.weapon-group-title{font-size:12px;color:#8ecfff;text-transform:uppercase;letter-spacing:2px;margin:18px 4px 8px;padding-bottom:6px;border-bottom:1px solid rgba(120,180,255,.25);font-weight:bold}
-.weapon-grid-inner{display:grid;grid-template-columns:1fr;gap:10px}
-@media (min-width:520px){.weapon-grid-inner{grid-template-columns:1fr 1fr}}
-.weapon-card{background:#1e1e2a;border:2px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:6px;position:relative}
+.slot-box .slot-num{font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase}
+.slot-box .slot-name{font-size:12px;font-weight:bold;color:#fff;margin-top:2px}
+.weapon-group-title{font-size:11px;color:#8ecfff;text-transform:uppercase;letter-spacing:1.5px;margin:12px 4px 6px;padding-bottom:4px;border-bottom:1px solid rgba(120,180,255,.25);font-weight:bold}
+.weapon-grid-inner{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (min-width:640px){.weapon-grid-inner{grid-template-columns:1fr 1fr 1fr}}
+.weapon-card{background:#1e1e2a;border:2px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;cursor:pointer;display:flex;flex-direction:column;gap:4px;position:relative}
 .weapon-card.active{border-color:#4a9eff;background:#223a55}
-.weapon-card .slot-btns{position:absolute;top:8px;right:10px;display:flex;gap:5px}
-.weapon-card .slot-btn{background:rgba(74,158,255,.15);color:#a0d0ff;border:1px solid rgba(74,158,255,.4);font-size:11px;padding:3px 9px;border-radius:5px;cursor:pointer;font-weight:bold;font-family:inherit}
+.weapon-card .slot-btns{position:absolute;top:5px;right:6px;display:flex;gap:3px}
+.weapon-card .slot-btn{background:rgba(74,158,255,.15);color:#a0d0ff;border:1px solid rgba(74,158,255,.4);font-size:10px;padding:2px 7px;border-radius:4px;cursor:pointer;font-weight:bold;font-family:inherit}
 .weapon-card .slot-btn.active{background:#4a9eff;color:#fff;border-color:#66bbff}
-.weapon-card .row1{display:flex;align-items:center;gap:10px}
-.weapon-card .wicon-big{width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:28px;background:rgba(0,0,0,.4);border-radius:8px}
-.weapon-card .info{flex:1}
-.weapon-card .wname{font-size:16px;font-weight:bold;color:#fff}
-.weapon-card .wdesc{font-size:12px;color:#999}
-.weapon-card .stats{display:flex;gap:8px;font-size:11px}
-.weapon-card .stat{flex:1;display:flex;flex-direction:column;gap:2px}
-.weapon-card .stat .label{color:#888;font-size:10px;text-transform:uppercase}
-.weapon-card .stat .bar{height:5px;background:#333;border-radius:3px;overflow:hidden}
-.weapon-card .stat .bar>div{height:100%;background:linear-gradient(90deg,#4a9eff,#66d9ff)}
+.weapon-card .row1{display:flex;align-items:center;gap:8px}
+.weapon-card .wicon-big{width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(0,0,0,.4);border-radius:6px;flex-shrink:0}
+.weapon-card .info{flex:1;min-width:0}
+.weapon-card .wname{font-size:13px;font-weight:bold;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.weapon-card .wdesc{font-size:10px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.weapon-card .stats{display:flex;gap:6px;font-size:10px}
+.weapon-card .stat{flex:1;display:flex;flex-direction:column;gap:1px}
+.weapon-card .stat .label{color:#888;font-size:9px}
+.weapon-card .stat .bar{height:3px;background:#333;border-radius:2px;overflow:hidden}
+.weapon-card .stat .bar>div{height:100%}
 .weapon-card .stat.attack .bar>div{background:linear-gradient(90deg,#ff4444,#ff8866)}
 .weapon-card .stat.rate .bar>div{background:linear-gradient(90deg,#ffcc44,#ffee88)}
 .weapon-card .stat.accur .bar>div{background:linear-gradient(90deg,#22c922,#66ff88)}
-.weapon-panel .close-row{display:flex;justify-content:center;margin-top:16px}
-.weapon-panel .close-row button{padding:12px 40px;background:#4a9eff;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:bold;font-family:inherit;cursor:pointer}
+.weapon-panel .close-row{display:flex;justify-content:center;margin-top:14px}
+.weapon-panel .close-row button{padding:12px 40px;background:#4a9eff;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:bold;font-family:inherit;cursor:pointer}
 #settings{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:700;display:none;padding:20px;padding-bottom:90px;pointer-events:auto}
 #settings.open{display:block}
 .settings-card{max-width:520px;margin:0 auto;background:#1a1a26;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:20px;pointer-events:auto}
@@ -204,7 +204,7 @@ body.editMode #editBar{display:flex}
 .death-actions .tolobby{background:linear-gradient(180deg,#5a3a8a,#3a1a5a);color:#fff;border:2px solid rgba(180,120,255,.7)}
 #gunMenuLobby{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:620;display:none;padding:20px}
 #gunMenuLobby.open{display:block}
-.gml-panel{max-width:700px;margin:20px auto;background:#15151f;border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:20px}
+.gml-panel{max-width:900px;margin:20px auto;background:#15151f;border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:20px}
 .gml-panel h2{margin:0 0 14px;font-size:22px;text-align:center;color:#ffcc44}
 .gml-panel .close-row{display:flex;justify-content:center;margin-top:16px}
 .gml-panel .close-row button{padding:12px 40px;background:#4a9eff;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:bold;font-family:inherit;cursor:pointer}
@@ -319,7 +319,7 @@ body.editMode #editBar{display:flex}
 <div id="lobby"><div class="lobby-card">
 <div class="lobby-emblem">🎯</div>
 <h1 class="lobby-title">MINI CS 2</h1>
-<div class="lobby-tagline">OVERPASS · TERMINAL · RIDGE</div>
+<div class="lobby-tagline">BUNKER · HARBOR · NEON · ARCTIC</div>
 <div class="lobby-stats-row">
 <div class="lobby-stat"><div class="ls-label">📊 Рекорд</div><div class="ls-val" id="lsBest">0</div></div>
 <div class="lobby-stat"><div class="ls-label">💀 Убийств</div><div class="ls-val" id="lsTotalKills">0</div></div>
@@ -345,7 +345,6 @@ body.editMode #editBar{display:flex}
 </div>
 <div class="lobby-hint">
 <b>Управление:</b> WASD · Мышь · Shift · ЛКМ · ПКМ · R · G · 1/2/3<br>
-<b>Лестницы:</b> W — вверх, S — вниз<br>
 <b>Дроп с ботов:</b> Аптечка 🩹 (+25 HP)
 </div>
 </div></div>
