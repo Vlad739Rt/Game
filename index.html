@@ -391,7 +391,6 @@ body.editMode #editBar{display:flex}
   
   logDebug('Старт.');
 
-  // Ловим ошибки и ПОКАЗЫВАЕМ ИХ ЧЕРЕЗ ALERT (чтобы точно увидеть)
   window.onerror = function(msg, url, line, col, error) {
     var m = 'ОШИБКА:\n' + msg + '\n\nФайл: ' + (url ? url.split('/').pop() : '') + '\nСтрока: ' + line;
     alert(m);
@@ -426,7 +425,7 @@ body.editMode #editBar{display:flex}
     script.onload = function() {
       logDebug('Three.js OK. Загрузка game.js...');
       var game = document.createElement('script');
-      game.src = 'game.js?v=' + Date.now(); // Сбиваем кэш
+      game.src = 'game.js?v=' + Date.now();
       game.onerror = function() {
         alert('ОШИБКА: Файл game.js не найден (404).\nУбедитесь, что он лежит в репозитории рядом с index.html.');
         logDebug('<span style="color:red">game.js не найден (404)</span>');
