@@ -377,41 +377,36 @@ body.editMode #editBar{display:flex}
 <div class="close-row"><button id="btnCloseGunMenuLobby">✕ Закрыть</button></div>
 </div></div>
 
+<!-- ОТЛАДОЧНЫЙ ТЕКСТ НА ЭКРАНЕ -->
+<div id="debugLog" style="position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.8);color:#00ff00;font-family:monospace;font-size:11px;padding:8px;z-index:99999;max-width:90vw;white-space:pre-wrap;border:1px solid #00ff00;display:none;"></div>
+
 <script>
 (function() {
-  // Функция для показа ошибок прямо на экране
-  function showError(msg) {
-    var loading = document.getElementById('loading');
-    var loadMsg = document.getElementById('loadMsg');
-    var loadErr = document.getElementById('loadErr');
-    if (loadMsg) loadMsg.textContent = '⚠ Ошибка загрузки';
-    if (loadErr) {
-      loadErr.style.display = 'block';
-      loadErr.textContent = '❌ ' + msg;
-    }
-    if (loading) loading.style.display = 'flex';
-  }
-  window.__showLoadErr = showError;
+  var debugEl = document.getElementById('debugLog');
+  debugEl.style.display = 'block';
+  
+  window.logDebug = function(txt) {
+    debugEl.innerHTML += '> ' + txt + '<br>';
+  };
+  
+  logDebug('Старт.');
 
-  // Ловим глобальные ошибки
-  window.addEventListener('error', function(e) {
-    var msg = e.message || 'Ошибка скрипта';
-    if (e.target && (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) {
-      msg = 'Не удалось загрузить: ' + (e.target.src || e.target.href);
-    }
-    showError(msg);
-  });
+  // Ловим ошибки и ПОКАЗЫВАЕМ ИХ ЧЕРЕЗ ALERT (чтобы точно увидеть)
+  window.onerror = function(msg, url, line, col, error) {
+    var m = 'ОШИБКА:\n' + msg + '\n\nФайл: ' + (url ? url.split('/').pop() : '') + '\nСтрока: ' + line;
+    alert(m);
+    logDebug('<span style="color:red">ОШИБКА: ' + msg + '</span>');
+    var elErr = document.getElementById('loadErr');
+    if(elErr) { elErr.style.display = 'block'; elErr.textContent = m; }
+  };
 
-  // Таймаут, если что-то зависло
   setTimeout(function() {
-    var loading = document.getElementById('loading');
-    var loadErr = document.getElementById('loadErr');
-    if (loading && loading.style.display !== 'none' && loadErr && loadErr.style.display === 'none') {
-      showError('Таймаут загрузки. Проверьте интернет или наличие файла game.js.');
+    if (document.getElementById('loading').style.display !== 'none') {
+      alert('ТАЙМАУТ 15 СЕКУНД.\nИгра не может загрузиться.\nПроверьте интернет.');
+      logDebug('<span style="color:red">ТАЙМАУТ</span>');
     }
   }, 15000);
 
-  // Загрузчик Three.js с разных CDN
   var cdns = [
     'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js',
     'https://unpkg.com/three@0.152.2/build/three.min.js',
@@ -421,21 +416,25 @@ body.editMode #editBar{display:flex}
 
   function tryLoad() {
     if (current >= cdns.length) {
-      showError('Не удалось загрузить three.js ни с одного CDN. Проверьте интернет.');
+      alert('ОШИБКА: Не удалось загрузить three.js ни с одного CDN.');
+      logDebug('<span style="color:red">Three.js не загружен.</span>');
       return;
     }
+    logDebug('Загрузка Three.js с CDN ' + (current + 1) + '...');
     var script = document.createElement('script');
     script.src = cdns[current];
     script.onload = function() {
-      // Three.js успешно загружен, загружаем игру
+      logDebug('Three.js OK. Загрузка game.js...');
       var game = document.createElement('script');
-      game.src = 'game.js';
+      game.src = 'game.js?v=' + Date.now(); // Сбиваем кэш
       game.onerror = function() {
-        showError('Файл game.js не найден (404). Убедитесь, что он лежит рядом с index.html.');
+        alert('ОШИБКА: Файл game.js не найден (404).\nУбедитесь, что он лежит в репозитории рядом с index.html.');
+        logDebug('<span style="color:red">game.js не найден (404)</span>');
       };
       document.body.appendChild(game);
     };
     script.onerror = function() {
+      logDebug('CDN ' + (current + 1) + ' не ответил. Пробуем следующий...');
       current++;
       tryLoad();
     };
