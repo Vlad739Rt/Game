@@ -378,7 +378,20 @@ body.editMode #editBar{display:flex}
 </div></div>
 
 <script>
-// 1. Загружаем Three.js с резервных серверов
+// Функция для показа критических ошибок
+function showCriticalError(msg) {
+    var loading = document.getElementById('loading');
+    var loadErr = document.getElementById('loadErr');
+    var loadMsg = document.getElementById('loadMsg');
+    if (loading) loading.style.display = 'flex';
+    if (loadMsg) loadMsg.textContent = '⚠ Ошибка загрузки';
+    if (loadErr) {
+        loadErr.style.display = 'block';
+        loadErr.textContent = '❌ ' + msg;
+    }
+}
+
+// Загрузчик Three.js
 (function() {
   var cdns = [
     'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js',
@@ -386,22 +399,38 @@ body.editMode #editBar{display:flex}
     'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js'
   ];
   var current = 0;
+  
   function tryLoad() {
     if (current >= cdns.length) {
-      document.getElementById('loadErr').style.display = 'block';
-      document.getElementById('loadErr').textContent = 'Ошибка: Не удалось загрузить Three.js. Проверьте интернет.';
+      showCriticalError('Не удалось загрузить Three.js. Проверьте интернет или VPN.');
       return;
     }
     var script = document.createElement('script');
     script.src = cdns[current];
-    script.onload = function() { startGame(); };
-    script.onerror = function() { current++; tryLoad(); };
+    script.onload = function() {
+      // Проверяем, что Three.js действительно загрузился
+      if (typeof THREE === 'undefined') {
+        showCriticalError('Three.js загрузился, но не инициализировался. Попробуйте обновить страницу.');
+        return;
+      }
+      
+      // Запускаем игру с защитой от ошибок
+      try {
+        startGame();
+      } catch (e) {
+        showCriticalError('Ошибка запуска игры: ' + e.message + '\n\nПопробуйте очистить кэш браузера.');
+      }
+    };
+    script.onerror = function() {
+      current++;
+      tryLoad();
+    };
     document.body.appendChild(script);
   }
   tryLoad();
 })();
 
-// 2. Встроенный код игры (полностью исправленный)
+// Игровой код
 function startGame() {
   (function(){
     'use strict';
@@ -758,7 +787,7 @@ function startGame() {
     muzzleFlashLight.position.set(0.06,-0.02,-0.55);
     viewCam.add(muzzleFlashLight);
     var renderer;
-    try{renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:!PERF_MODE,powerPreference:"high-performance",alpha:false,stencil:false});renderer.setPixelRatio(1);renderer.setSize(window.innerWidth,window.innerHeight,false);renderer.setClearColor(0x505868,1);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;renderer.shadowMap.enabled=false;}catch(e){}
+    try{renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:!PERF_MODE,powerPreference:"high-performance",alpha:false,stencil:false});renderer.setPixelRatio(1);renderer.setSize(window.innerWidth,window.innerHeight,false);renderer.setClearColor(0x505868,1);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;renderer.shadowMap.enabled=false;}catch(e){showCriticalError("WebGL не поддерживается вашим браузером.");return;}
 
     var ambientLight,hemiLight,sunLight,fillLight;
     var mapPointLights=[];
