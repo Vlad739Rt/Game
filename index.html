@@ -372,7 +372,44 @@ body.editMode #editBar{display:flex}
 <div id="gunGridLobby"></div>
 <div class="close-row"><button id="btnCloseGunMenuLobby">✕ Закрыть</button></div>
 </div></div>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" onerror="window.__showLoadErr('Не удалось загрузить three.js с jsdelivr. Проверь интернет.')"></script>
-<script src="game.js"></script>
+<script>
+(function(){
+  function showErr(msg){
+    var loading=document.getElementById('loading');
+    var loadMsg=document.getElementById('loadMsg');
+    var loadErr=document.getElementById('loadErr');
+    if(loadMsg)loadMsg.textContent='⚠ Ошибка загрузки';
+    if(loadErr){loadErr.style.display='block';loadErr.textContent='❌ '+msg;}
+    if(loading)loading.style.display='flex';
+  }
+  window.__showLoadErr=showErr;
+  window.__loadScript=function(urls,onload,onfail){
+    var i=0;
+    function tryNext(){
+      if(i>=urls.length){if(onfail)onfail();return;}
+      var s=document.createElement('script');
+      s.src=urls[i++];
+      s.onload=function(){if(onload)onload();};
+      s.onerror=function(){tryNext();};
+      document.body.appendChild(s);
+    }
+    tryNext();
+  };
+})();
+</script>
+<script>
+window.__loadScript([
+  'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js',
+  'https://unpkg.com/three@0.152.2/build/three.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js'
+], function(){
+  var s=document.createElement('script');
+  s.src='game.js';
+  s.onerror=function(){window.__showLoadErr('Не удалось загрузить game.js. Проверьте, что файл лежит рядом с index.html.');};
+  document.body.appendChild(s);
+}, function(){
+  window.__showLoadErr('Не удалось загрузить three.js ни с одного CDN (jsdelivr, unpkg, cdnjs). Проверьте интернет или положите three.min.js локально рядом с index.html и подключите его через <script src="three.min.js"></script>.');
+});
+</script>
 </body>
 </html>
