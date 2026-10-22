@@ -378,7 +378,7 @@ body.editMode #editBar{display:flex}
 </div></div>
 
 <script>
-// Функция для показа критических ошибок
+// 1. Функция для показа критических ошибок
 function showCriticalError(msg) {
     var loading = document.getElementById('loading');
     var loadErr = document.getElementById('loadErr');
@@ -391,7 +391,7 @@ function showCriticalError(msg) {
     }
 }
 
-// Загрузчик Three.js
+// 2. Загрузчик Three.js с выводом статуса
 (function() {
   var cdns = [
     'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js',
@@ -405,21 +405,21 @@ function showCriticalError(msg) {
       showCriticalError('Не удалось загрузить Three.js. Проверьте интернет или VPN.');
       return;
     }
+    
+    var statusText = "Загрузка Three.js (Сервер " + (current + 1) + "/3)...";
+    document.getElementById('loadMsg').innerText = statusText;
+    
     var script = document.createElement('script');
     script.src = cdns[current];
     script.onload = function() {
-      // Проверяем, что Three.js действительно загрузился
-      if (typeof THREE === 'undefined') {
-        showCriticalError('Three.js загрузился, но не инициализировался. Попробуйте обновить страницу.');
-        return;
-      }
-      
-      // Запускаем игру с защитой от ошибок
-      try {
-        startGame();
-      } catch (e) {
-        showCriticalError('Ошибка запуска игры: ' + e.message + '\n\nПопробуйте очистить кэш браузера.');
-      }
+      document.getElementById('loadMsg').innerText = "Three.js загружен. Запуск игры...";
+      setTimeout(function() {
+        try {
+          startGame();
+        } catch (e) {
+          showCriticalError("Ошибка при запуске: " + e.message + "\n\n" + e.stack);
+        }
+      }, 50);
     };
     script.onerror = function() {
       current++;
@@ -430,11 +430,15 @@ function showCriticalError(msg) {
   tryLoad();
 })();
 
-// Игровой код
+// 3. Игровой код
 function startGame() {
   (function(){
     'use strict';
-    if(!window.THREE){ return; }
+    if(!window.THREE){ showCriticalError("THREE не загрузился"); return; }
+    
+    // --- ИНИЦИАЛИЗАЦИЯ ---
+    document.getElementById('loadMsg').innerText = "Создание текстур...";
+    
     window.installBufferGeometryUtils=function(){
       if(!window.THREE)return;
       if(window.BufferGeometryUtils&&window.BufferGeometryUtils.mergeGeometries)return;
@@ -704,7 +708,7 @@ function startGame() {
     function findFreeSpotInZone(zone,maxTries){var tries=maxTries||300;var xMin,xMax,zMin,zMax;if(zone==="south"){zMin=Math.floor(MAP_H*0.78);zMax=MAP_H-3;xMin=4;xMax=MAP_W-4;}else if(zone==="north"){zMin=1;zMax=Math.floor(MAP_H*0.25);xMin=4;xMax=MAP_W-4;}else{zMin=2;zMax=MAP_H-3;xMin=2;xMax=MAP_W-3;}for(var i=0;i<tries;i++){var x=xMin+0.5+Math.random()*(xMax-xMin),z=zMin+0.5+Math.random()*(zMax-zMin);if(canMove(x,z))return{x:x,z:z};}return{x:MAP_W/2,z:MAP_H/2};}
     function getBotSpawnOpposite(){if(validBotCells.length===0)return null;var playerInSouth=player.z>MAP_H*0.5;var zMin=playerInSouth?1:Math.floor(MAP_H*0.6);var zMax=playerInSouth?Math.floor(MAP_H*0.4):MAP_H-1;var zone=[];for(var i=0;i<validBotCells.length;i++)if(validBotCells[i].z>=zMin&&validBotCells[i].z<=zMax)zone.push(validBotCells[i]);var pool=zone.length>0?zone:validBotCells;var farFromPlayer=[];for(var i=0;i<pool.length;i++){var dx=pool[i].x-player.x,dz=pool[i].z-player.z;if(Math.sqrt(dx*dx+dz*dz)>=18)farFromPlayer.push(pool[i]);}if(farFromPlayer.length>0)pool=farFromPlayer;return pool[Math.floor(Math.random()*pool.length)];}
 
-    function makeSkin(baseHex,accentHex,patternFn){var S=128;var c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle=baseHex;x.fillRect(0,0,S,S);if(patternFn)patternFn(x,S,accentHex);var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;t.needsUpdate=true;return t;}
+    function makeSkin(baseHex,accentHex,patternFn){var S=PERF_MODE?64:128;var c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle=baseHex;x.fillRect(0,0,S,S);if(patternFn)patternFn(x,S,accentHex);var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;t.needsUpdate=true;return t;}
     function skinRedline(x,S,a){x.strokeStyle=a;x.lineWidth=3;for(var i=0;i<6;i++){x.beginPath();x.moveTo(0,20+i*18);x.lineTo(S,12+i*18);x.stroke();}}
     function skinAsiimov(x,S,a){x.fillStyle="#f4f4f4";x.fillRect(0,0,S,S);x.fillStyle=a;x.beginPath();x.moveTo(0,0);x.lineTo(S*0.6,0);x.lineTo(0,S*0.5);x.closePath();x.fill();x.beginPath();x.moveTo(S,S);x.lineTo(S*0.4,S);x.lineTo(S,S*0.5);x.closePath();x.fill();}
     function skinVulcan(x,S,a){x.fillStyle="#1a2a3a";x.fillRect(0,0,S,S);x.strokeStyle="#e0e0e0";x.lineWidth=4;for(var i=0;i<5;i++){x.beginPath();x.moveTo(0,i*26);x.lineTo(S,i*26+10);x.stroke();}x.fillStyle=a;x.fillRect(0,S*0.45,S,8);}
@@ -716,17 +720,17 @@ function startGame() {
     function getSkinTexture(k){if(!k||k==="default")return null;if(SKIN_TEX_CACHE[k])return SKIN_TEX_CACHE[k];var def=SKINS[k];if(!def||!def.tex)return null;try{SKIN_TEX_CACHE[k]=def.tex();}catch(e){return null;}return SKIN_TEX_CACHE[k];}
     function applySkinToModel(model,skinKey){var tex=getSkinTexture(skinKey);if(!model)return;model.traverse(function(o){if(!o.isMesh||!o.material)return;if(!o.userData._skinMats){o.userData._skinMats={map:o.material.map||null,color:o.material.color?o.material.color.clone():null};}if(tex){var m=o.material;if(m.metalness!==undefined&&m.metalness>0.3){o.material=m.clone();o.material.map=tex;if(o.material.color)o.material.color.set(0xffffff);}}else{if(o.userData._skinMats.map!==undefined)o.material.map=o.userData._skinMats.map;if(o.userData._skinMats.color&&o.material.color)o.material.color.copy(o.userData._skinMats.color);}});}
 
-    function makeSandbagTexture(){var S=64,c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle="#8a7850";x.fillRect(0,0,S,S);for(var i=0;i<400;i++){x.fillStyle="rgba(140,120,80,.5)";x.fillRect(Math.random()*S,Math.random()*S,2,2);}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
-    function makeGlassTexture(){var S=64,c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");var g=x.createLinearGradient(0,0,S,S);g.addColorStop(0,"rgba(180,220,255,.5)");g.addColorStop(1,"rgba(180,220,255,.5)");x.fillStyle=g;x.fillRect(0,0,S,S);var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
-    function makeWoodDoorTexture(){var S=64,c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle="#5a3a1e";x.fillRect(0,0,S,S);x.strokeStyle="rgba(20,10,4,.7)";x.lineWidth=2;for(var i=1;i<4;i++){x.beginPath();x.moveTo(0,i*S/4);x.lineTo(S,i*S/4);x.stroke();}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
-    function makeMetalTexture(base){var S=64;var c=document.createElement("canvas");c.width=S;c.height=S;var ctx=c.getContext("2d");ctx.fillStyle=base;ctx.fillRect(0,0,S,S);for(var i=0;i<300;i++){var v=Math.random()*30-15;ctx.fillStyle="rgba("+(128+v)+","+(128+v)+","+(128+v)+",.2)";ctx.fillRect(Math.random()*S,Math.random()*S,Math.random()*4+1,Math.random()*4+1);}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
-    function makeWoodTexture(){var S=128;var c=document.createElement("canvas");c.width=S;c.height=S;var ctx=c.getContext("2d");ctx.fillStyle="#8a5a28";ctx.fillRect(0,0,S,S);for(var i=0;i<30;i++){ctx.strokeStyle="rgba(40,20,5,.3)";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,Math.random()*S);ctx.lineTo(S,Math.random()*S);ctx.stroke();}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
-    function makePolymerTexture(){var S=64;var c=document.createElement("canvas");c.width=S;c.height=S;var ctx=c.getContext("2d");ctx.fillStyle="#1c1c1c";ctx.fillRect(0,0,S,S);ctx.strokeStyle="rgba(60,60,60,.5)";ctx.lineWidth=1;for(var i=-S;i<S*2;i+=6){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+S,S);ctx.stroke();}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
-    function makeBladeTexture(){var S=128;var c=document.createElement("canvas");c.width=S;c.height=S;var ctx=c.getContext("2d");var gr=ctx.createLinearGradient(0,0,S,0);gr.addColorStop(0,"#8a9098");gr.addColorStop(.5,"#ffffff");gr.addColorStop(1,"#7a8088");ctx.fillStyle=gr;ctx.fillRect(0,0,S,S);var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
-    function makeBulletHoleTexture(){var S=64;var c=document.createElement("canvas");c.width=S;c.height=S;var ctx=c.getContext("2d");var cx=S/2,cy=S/2;var g=ctx.createRadialGradient(cx,cy,1,cx,cy,S*.3);g.addColorStop(0,"rgba(10,5,0,1)");g.addColorStop(.5,"rgba(40,25,15,.8)");g.addColorStop(1,"rgba(80,50,30,0)");ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,S*.3,0,Math.PI*2);ctx.fill();var t=new THREE.CanvasTexture(c);t.needsUpdate=true;return t;}
-    function makeGloveTexture(){var S=128;var c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle="#1a1a1f";x.fillRect(0,0,S,S);x.strokeStyle="rgba(60,60,70,.55)";x.lineWidth=1;for(var i=0;i<S;i+=6){x.beginPath();x.moveTo(i,0);x.lineTo(i,S);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(S,i);x.stroke();}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
-    function makeSleeveTexture(){var S=128;var c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle="#2a3a2a";x.fillRect(0,0,S,S);x.fillStyle="rgba(255,255,255,.06)";for(var i=0;i<60;i++)x.fillRect(Math.random()*S,Math.random()*S,3,3);var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
-    function makeSmokeTexture(){var S=64;var c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");var g=x.createRadialGradient(S/2,S/2,2,S/2,S/2,S/2);g.addColorStop(0,"rgba(220,220,220,0.55)");g.addColorStop(0.4,"rgba(180,180,180,0.30)");g.addColorStop(1,"rgba(120,120,120,0)");x.fillStyle=g;x.fillRect(0,0,S,S);var t=new THREE.CanvasTexture(c);t.needsUpdate=true;return t;}
+    function makeSandbagTexture(){var S=PERF_MODE?32:64,c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle="#8a7850";x.fillRect(0,0,S,S);for(var i=0;i<(PERF_MODE?100:400);i++){x.fillStyle="rgba(140,120,80,.5)";x.fillRect(Math.random()*S,Math.random()*S,2,2);}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
+    function makeGlassTexture(){var S=PERF_MODE?32:64,c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");var g=x.createLinearGradient(0,0,S,S);g.addColorStop(0,"rgba(180,220,255,.5)");g.addColorStop(1,"rgba(180,220,255,.5)");x.fillStyle=g;x.fillRect(0,0,S,S);var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
+    function makeWoodDoorTexture(){var S=PERF_MODE?32:64,c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle="#5a3a1e";x.fillRect(0,0,S,S);x.strokeStyle="rgba(20,10,4,.7)";x.lineWidth=2;for(var i=1;i<4;i++){x.beginPath();x.moveTo(0,i*S/4);x.lineTo(S,i*S/4);x.stroke();}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
+    function makeMetalTexture(base){var S=PERF_MODE?32:64;var c=document.createElement("canvas");c.width=S;c.height=S;var ctx=c.getContext("2d");ctx.fillStyle=base;ctx.fillRect(0,0,S,S);for(var i=0;i<(PERF_MODE?100:300);i++){var v=Math.random()*30-15;ctx.fillStyle="rgba("+(128+v)+","+(128+v)+","+(128+v)+",.2)";ctx.fillRect(Math.random()*S,Math.random()*S,Math.random()*4+1,Math.random()*4+1);}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
+    function makeWoodTexture(){var S=PERF_MODE?64:128;var c=document.createElement("canvas");c.width=S;c.height=S;var ctx=c.getContext("2d");ctx.fillStyle="#8a5a28";ctx.fillRect(0,0,S,S);for(var i=0;i<30;i++){ctx.strokeStyle="rgba(40,20,5,.3)";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,Math.random()*S);ctx.lineTo(S,Math.random()*S);ctx.stroke();}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
+    function makePolymerTexture(){var S=PERF_MODE?32:64;var c=document.createElement("canvas");c.width=S;c.height=S;var ctx=c.getContext("2d");ctx.fillStyle="#1c1c1c";ctx.fillRect(0,0,S,S);ctx.strokeStyle="rgba(60,60,60,.5)";ctx.lineWidth=1;for(var i=-S;i<S*2;i+=6){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+S,S);ctx.stroke();}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
+    function makeBladeTexture(){var S=PERF_MODE?64:128;var c=document.createElement("canvas");c.width=S;c.height=S;var ctx=c.getContext("2d");var gr=ctx.createLinearGradient(0,0,S,0);gr.addColorStop(0,"#8a9098");gr.addColorStop(.5,"#ffffff");gr.addColorStop(1,"#7a8088");ctx.fillStyle=gr;ctx.fillRect(0,0,S,S);var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
+    function makeBulletHoleTexture(){var S=PERF_MODE?32:64;var c=document.createElement("canvas");c.width=S;c.height=S;var ctx=c.getContext("2d");var cx=S/2,cy=S/2;var g=ctx.createRadialGradient(cx,cy,1,cx,cy,S*.3);g.addColorStop(0,"rgba(10,5,0,1)");g.addColorStop(.5,"rgba(40,25,15,.8)");g.addColorStop(1,"rgba(80,50,30,0)");ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,S*.3,0,Math.PI*2);ctx.fill();var t=new THREE.CanvasTexture(c);t.needsUpdate=true;return t;}
+    function makeGloveTexture(){var S=PERF_MODE?64:128;var c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle="#1a1a1f";x.fillRect(0,0,S,S);x.strokeStyle="rgba(60,60,70,.55)";x.lineWidth=1;for(var i=0;i<S;i+=6){x.beginPath();x.moveTo(i,0);x.lineTo(i,S);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(S,i);x.stroke();}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
+    function makeSleeveTexture(){var S=PERF_MODE?64:128;var c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle="#2a3a2a";x.fillRect(0,0,S,S);x.fillStyle="rgba(255,255,255,.06)";for(var i=0;i<60;i++)x.fillRect(Math.random()*S,Math.random()*S,3,3);var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t;}
+    function makeSmokeTexture(){var S=PERF_MODE?32:64;var c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");var g=x.createRadialGradient(S/2,S/2,2,S/2,S/2,S/2);g.addColorStop(0,"rgba(220,220,220,0.55)");g.addColorStop(0.4,"rgba(180,180,180,0.30)");g.addColorStop(1,"rgba(120,120,120,0)");x.fillStyle=g;x.fillRect(0,0,S,S);var t=new THREE.CanvasTexture(c);t.needsUpdate=true;return t;}
 
     var DECOR_TEX={sandbag:makeSandbagTexture(),glass:makeGlassTexture(),door:makeWoodDoorTexture()};
     var WEAPON_TEX={metalDark:makeMetalTexture("#2a2a2a"),metalMid:makeMetalTexture("#3e3e3e"),metalChrome:makeMetalTexture("#7a7a7a"),wood:makeWoodTexture(),polymer:makePolymerTexture(),polymerLight:makeMetalTexture("#4a4a4a"),magazine:makeMetalTexture("#5a3e1c"),blade:makeBladeTexture()};
@@ -742,7 +746,7 @@ function startGame() {
     resizeOverlay();
     var weaponMenuEl=document.getElementById("weaponMenu"),settingsEl=document.getElementById("settings"),lobbyEl=document.getElementById("lobby"),inspectHintEl=document.getElementById("inspectHint"),mapSelectEl=document.getElementById("mapSelectModal"),deathScreenEl=document.getElementById("deathScreen"),gunMenuLobbyEl=document.getElementById("gunMenuLobby");
 
-    var TEX_SIZE=128;
+    var TEX_SIZE=PERF_MODE?64:128;
     var TEXTURES={1:null,2:null,3:null,4:null,5:null};var TEX_FLOOR=null;
     function drawStone(x){var S=TEX_SIZE;var g=x.createLinearGradient(0,0,0,S);g.addColorStop(0,"#7a8898");g.addColorStop(.5,"#5a6878");g.addColorStop(1,"#3a4858");x.fillStyle=g;x.fillRect(0,0,S,S);for(var i=0;i<S*S*0.3;i++){var v=Math.random()*40-20;x.fillStyle="rgba("+(120+v)+","+(130+v)+","+(140+v)+",.25)";x.fillRect(Math.random()*S,Math.random()*S,2,2);}}
     function drawWood(x){var S=TEX_SIZE;x.fillStyle="#8a5a28";x.fillRect(0,0,S,S);for(var i=0;i<8;i++){x.fillStyle="rgba(20,8,2,.5)";x.fillRect(0,i*S/8,S,1);}}
@@ -786,8 +790,22 @@ function startGame() {
     var muzzleFlashLight=new THREE.PointLight(0xffddaa,0,2.2,2);
     muzzleFlashLight.position.set(0.06,-0.02,-0.55);
     viewCam.add(muzzleFlashLight);
+
+    document.getElementById('loadMsg').innerText = "Создание 3D-движка...";
     var renderer;
-    try{renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:!PERF_MODE,powerPreference:"high-performance",alpha:false,stencil:false});renderer.setPixelRatio(1);renderer.setSize(window.innerWidth,window.innerHeight,false);renderer.setClearColor(0x505868,1);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;renderer.shadowMap.enabled=false;}catch(e){showCriticalError("WebGL не поддерживается вашим браузером.");return;}
+    try{
+        renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:!PERF_MODE,powerPreference:"high-performance",alpha:false,stencil:false});
+        renderer.setPixelRatio(1);
+        renderer.setSize(window.innerWidth,window.innerHeight,false);
+        renderer.setClearColor(0x505868,1);
+        renderer.outputColorSpace=THREE.SRGBColorSpace;
+        renderer.toneMapping=THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure=1.15;
+        renderer.shadowMap.enabled=false;
+    }catch(e){
+        showCriticalError("WebGL не поддерживается вашим браузером. Обновите Chrome или включите аппаратное ускорение.\n\n" + e.message);
+        return;
+    }
 
     var ambientLight,hemiLight,sunLight,fillLight;
     var mapPointLights=[];
@@ -1043,7 +1061,7 @@ function startGame() {
       var extraPositions=[];
       for(var z=3;z<MAP_H-3;z++)for(var x=3;x<MAP_W-3;x++){
         if(MAP[z][x]!==0)continue;
-        if(Math.random()>0.045)continue;
+        if(Math.random()>(PERF_MODE?0.01:0.045))continue; // Меньше объектов на телефоне
         var tooClose=false;
         for(var ep=0;ep<extraPositions.length;ep++){
           if(Math.abs(extraPositions[ep].x-x)<3&&Math.abs(extraPositions[ep].z-z)<3){tooClose=true;break;}
@@ -1131,6 +1149,8 @@ function startGame() {
     function box(w,h,d,m,x,y,z){var mm=new THREE.Mesh(getBoxGeo(w,h,d),m);mm.position.set(x,y,z);return mm;}
     function cyl(rt,rb,h,s,m,x,y,z,ax){var mm=new THREE.Mesh(getCylGeo(rt,rb,h,s),m);mm.position.set(x,y,z);if(ax==="x")mm.rotation.z=Math.PI/2;else if(ax==="z")mm.rotation.x=Math.PI/2;return mm;}
 
+    document.getElementById('loadMsg').innerText = "Создание моделей оружия...";
+    
     function buildWeaponModel(key){
       var d=WEAPON_DEFS[key].model||{};
       var g=new THREE.Group();
@@ -1875,10 +1895,15 @@ function startGame() {
     document.getElementById("btnFs").addEventListener("touchstart",function(e){if(editMode||anyModalOpen())return;e.preventDefault();e.stopPropagation();toggleFullscreen();setTimeout(onResize,300);},{passive:false});
     window.addEventListener("touchstart",function(){hint.style.display="none";},{once:true});}
 
+    document.getElementById('loadMsg').innerText = "Построение карты...";
     try{buildWorld("harbor");}catch(e){console.error(e);}
+    
+    document.getElementById('loadMsg').innerText = "Запуск интерфейса...";
     updateLobbyStats();showLobby();
     resizeOverlay();
+    
     if(window.__forceHideLoading)window.__forceHideLoading();
+    
     var lastRenderTime=performance.now();
     function loop(now){requestAnimationFrame(loop);try{
     var dtMs=now-lastRenderTime;lastRenderTime=now;var dt=Math.min(0.05,dtMs/1000);
