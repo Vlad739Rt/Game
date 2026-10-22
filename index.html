@@ -391,28 +391,39 @@ function showCriticalError(msg) {
     }
 }
 
-// 2. Загрузчик Three.js с выводом статуса
+// 2. Загрузчик Three.js с таймером (обход блокировок)
 (function() {
   var cdns = [
-    'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js',
     'https://unpkg.com/three@0.152.2/build/three.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js'
+    'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js'
   ];
   var current = 0;
   
   function tryLoad() {
     if (current >= cdns.length) {
-      showCriticalError('Не удалось загрузить Three.js. Проверьте интернет или VPN.');
+      showCriticalError('Не удалось загрузить Three.js. Ваш провайдер блокирует сервера. Попробуйте включить VPN.');
       return;
     }
     
     var statusText = "Загрузка Three.js (Сервер " + (current + 1) + "/3)...";
     document.getElementById('loadMsg').innerText = statusText;
     
+    var loaded = false;
+    var timeout = setTimeout(function() {
+      if (!loaded) {
+        current++;
+        tryLoad();
+      }
+    }, 4000); // Ждем 4 секунды, если сервер висит
+
     var script = document.createElement('script');
     script.src = cdns[current];
     script.onload = function() {
-      document.getElementById('loadMsg').innerText = "Three.js загружен. Запуск игры...";
+      if (loaded) return;
+      loaded = true;
+      clearTimeout(timeout);
+      document.getElementById('loadMsg').innerText = "Запуск игры...";
       setTimeout(function() {
         try {
           startGame();
@@ -422,6 +433,9 @@ function showCriticalError(msg) {
       }, 50);
     };
     script.onerror = function() {
+      if (loaded) return;
+      loaded = true;
+      clearTimeout(timeout);
       current++;
       tryLoad();
     };
@@ -436,7 +450,6 @@ function startGame() {
     'use strict';
     if(!window.THREE){ showCriticalError("THREE не загрузился"); return; }
     
-    // --- ИНИЦИАЛИЗАЦИЯ ---
     document.getElementById('loadMsg').innerText = "Создание текстур...";
     
     window.installBufferGeometryUtils=function(){
